@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang='en'>
+    <head>
+        <meta charset='UTF-8' />
+        <meta name='viewport' content='width=device-width, initial-scale=1.0, viewport-fit=cover' />
+        <meta name='description' content='Daily Word - Your daily Bible companion with complete offline KJV Bible, daily verses, search, and favorites. Read the Bible anytime, anywhere.' />
+        <meta name='keywords' content='Bible, KJV, daily verse, Bible app, offline Bible, scripture, Christian, devotional' />
+        <meta name='author' content='Daily Word' />
+        <meta name='theme-color' content='#6366f1' />
+        <meta name='theme-color' media='(prefers-color-scheme: light)' content='#ffffff' />
+        <meta name='theme-color' media='(prefers-color-scheme: dark)' content='#1a1a2e' />
+        
+        <!-- PWA Meta Tags -->
+        <meta name='mobile-web-app-capable' content='yes' />
+        <meta name='apple-mobile-web-app-capable' content='yes' />
+        <meta name='apple-mobile-web-app-status-bar-style' content='default' />
+        <meta name='apple-mobile-web-app-title' content='Daily Word' />
+        <meta name='application-name' content='Daily Word' />
+        <meta name='msapplication-TileColor' content='#6366f1' />
+        <meta name='msapplication-tap-highlight' content='no' />
+        
+        <!-- Manifest -->
+        <link rel='manifest' href='/manifest.json' />
+        
+        <!-- Icons -->
+        <link rel='icon' type='image/png' href='/assets/generated/bible-app-logo-transparent.dim_200x200.png' />
+        <link rel='apple-touch-icon' href='/assets/generated/bible-app-logo-transparent.dim_200x200.png' />
+        <link rel='shortcut icon' href='/assets/generated/bible-app-logo-transparent.dim_200x200.png' />
+        
+        <!-- Open Graph / Social Media -->
+        <meta property='og:type' content='website' />
+        <meta property='og:title' content='Daily Word - Bible App' />
+        <meta property='og:description' content='Your daily Bible companion with complete offline KJV Bible, daily verses, search, and favorites' />
+        <meta property='og:image' content='/assets/generated/bible-app-logo-transparent.dim_200x200.png' />
+        <meta property='og:url' content='/' />
+        <meta property='og:site_name' content='Daily Word' />
+        
+        <!-- Twitter Card -->
+        <meta name='twitter:card' content='summary' />
+        <meta name='twitter:title' content='Daily Word - Bible App' />
+        <meta name='twitter:description' content='Your daily Bible companion with complete offline KJV Bible' />
+        <meta name='twitter:image' content='/assets/generated/bible-app-logo-transparent.dim_200x200.png' />
+        
+        <title>Daily Word - Bible App</title>
+        
+        <!-- Preload critical assets -->
+        <link rel='preload' href='/bible-data.json' as='fetch' crossorigin='anonymous' />
+        
+        <!-- Service Worker Registration -->
+        <script>
+            // Register service worker for offline functionality
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js')
+                        .then(registration => {
+                            console.log('✓ Service Worker registered successfully:', registration.scope);
+                            
+                            // Check for updates periodically
+                            setInterval(() => {
+                                registration.update();
+                            }, 60 * 60 * 1000); // Check every hour
+                        })
+                        .catch(error => {
+                            console.error('✗ Service Worker registration failed:', error);
+                        });
+                });
+                
+                // Listen for service worker updates
+                navigator.serviceWorker.addEventListener('controllerchange', () => {
+                    console.log('✓ Service Worker updated, reloading page...');
+                    window.location.reload();
+                });
+            } else {
+                console.warn('Service Worker not supported in this browser');
+            }
+            
+            // Install prompt handling
+            let deferredPrompt;
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                console.log('✓ Install prompt available');
+            });
+            
+            // Track installation
+            window.addEventListener('appinstalled', () => {
+                console.log('✓ PWA installed successfully');
+                deferredPrompt = null;
+            });
+        </script>
+    </head>
+    <body>
+        <noscript>
+            <div style='padding: 2rem; text-align: center; font-family: sans-serif;'>
+                <h1>JavaScript Required</h1>
+                <p>Daily Word requires JavaScript to be enabled. Please enable JavaScript in your browser settings.</p>
+            </div>
+        </noscript>
+        <div id='root'></div>
+        <script type='module' src='/src/main.tsx'></script>
+    </body>
+</html>
+
