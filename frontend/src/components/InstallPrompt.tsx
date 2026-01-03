@@ -1,7 +1,4 @@
 import { useEffect, useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Download, X, Smartphone } from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
@@ -14,7 +11,6 @@ export default function InstallPrompt() {
   const [isInstalled, setIsInstalled] = useState(false);
 
   useEffect(() => {
-    // Check if already installed
     if (window.matchMedia('(display-mode: standalone)').matches) {
       setIsInstalled(true);
       return;
@@ -23,39 +19,26 @@ export default function InstallPrompt() {
     const handler = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
-      
-      // Check if user has dismissed the prompt before
+
       const dismissed = localStorage.getItem('install_prompt_dismissed');
       const dismissedTime = localStorage.getItem('install_prompt_dismissed_time');
-      
-      // Show prompt again after 7 days
       if (dismissed && dismissedTime) {
         const daysSinceDismissed = (Date.now() - parseInt(dismissedTime, 10)) / (1000 * 60 * 60 * 24);
-        if (daysSinceDismissed < 7) {
-          return;
-        }
+        if (daysSinceDismissed < 7) return;
       }
-      
-      // Delay showing prompt by 30 seconds to not interrupt initial experience
-      setTimeout(() => {
-        setShowPrompt(true);
-      }, 30000);
+
+      setTimeout(() => setShowPrompt(true), 30000);
     };
 
     window.addEventListener('beforeinstallprompt', handler);
-
-    // Listen for successful installation
     window.addEventListener('appinstalled', () => {
-      console.log('✓ PWA installed successfully');
       setIsInstalled(true);
       setShowPrompt(false);
       localStorage.removeItem('install_prompt_dismissed');
       localStorage.removeItem('install_prompt_dismissed_time');
     });
 
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handler);
-    };
+    return () => window.removeEventListener('beforeinstallprompt', handler);
   }, []);
 
   const handleInstall = async () => {
@@ -64,15 +47,9 @@ export default function InstallPrompt() {
     try {
       await deferredPrompt.prompt();
       const { outcome } = await deferredPrompt.userChoice;
-
-      if (outcome === 'accepted') {
-        console.log('✓ User accepted the install prompt');
-        setShowPrompt(false);
-      } else {
-        console.log('User dismissed the install prompt');
-      }
-    } catch (error) {
-      console.error('Error showing install prompt:', error);
+      if (outcome === 'accepted') setShowPrompt(false);
+    } catch (err) {
+      console.error(err);
     }
 
     setDeferredPrompt(null);
@@ -87,48 +64,35 @@ export default function InstallPrompt() {
   if (!showPrompt || isInstalled) return null;
 
   return (
-    <div className="fixed bottom-4 left-4 right-4 z-50 animate-in slide-in-from-bottom-5 md:left-auto md:right-4 md:w-96">
-      <Card className="border-2 shadow-lg">
-        <CardHeader className="relative pb-3">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute right-2 top-2 h-6 w-6"
-            onClick={handleDismiss}
-            aria-label="Dismiss install prompt"
-          >
-            <X className="h-4 w-4" />
-          </Button>
-          <CardTitle className="flex items-center gap-2 text-lg">
-            <Smartphone className="h-5 w-5 text-primary" />
-            Install Daily Word
-          </CardTitle>
-          <CardDescription>
-            Install the app for quick access, offline reading, and a native app experience on your device
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <div className="flex flex-col gap-2 text-sm text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <Download className="h-4 w-4 text-primary" />
-              <span>Works completely offline</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Download className="h-4 w-4 text-primary" />
-              <span>Fast access from home screen</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Download className="h-4 w-4 text-primary" />
-              <span>No app store required</span>
-            </div>
-          </div>
-          <Button onClick={handleInstall} className="w-full" size="lg">
-            <Download className="mr-2 h-4 w-4" />
-            Install App
-          </Button>
-        </CardContent>
-      </Card>
+    <div className="fixed bottom-4 left-4 right-4 z-50 md:left-auto md:right-4 md:w-96">
+      <div className="border-2 shadow-lg rounded-lg bg-white p-4 animate-slide-in">
+        <button
+          className="absolute top-2 right-2 text-gray-500 hover:text-gray-800"
+          onClick={handleDismiss}
+          aria-label="Dismiss install prompt"
+        >
+          ✕
+        </button>
+        <h3 className="text-lg font-bold flex items-center gap-2 mb-1">
+          📱 Install Daily Word
+        </h3>
+        <p className="text-sm text-gray-600 mb-4">
+          Install the app for quick access, offline reading, and a native experience
+        </p>
+
+        <ul className="text-sm text-gray-700 mb-4 space-y-1">
+          <li>✅ Works completely offline</li>
+          <li>✅ Fast access from home screen</li>
+          <li>✅ No app store required</li>
+        </ul>
+
+        <button
+          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+          onClick={handleInstall}
+        >
+          Install App
+        </button>
+      </div>
     </div>
   );
 }
-

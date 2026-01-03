@@ -1,20 +1,10 @@
-import { Heart } from 'lucide-react';
+import React from 'react';
 
 export default function Footer() {
   return (
-    <footer className="border-t bg-background py-6">
-      <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
-        <p className="flex items-center justify-center gap-1">
-          © 2025. Built with <Heart className="h-4 w-4 fill-red-500 text-red-500" /> using{' '}
-          <a
-            href="https://caffeine.ai"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="font-medium text-primary hover:underline"
-          >
-            caffeine.ai
-          </a>
-        </p>
+    <footer className="bg-blue-600 dark:bg-gray-800 text-white py-4 mt-auto">
+      <div className="container mx-auto text-center text-sm">
+        Bible PWA – Fully Offline | 66 Books, 1,189 Chapters, 31,102 Verses
       </div>
     </footer>
   );
